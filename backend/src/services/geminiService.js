@@ -32,7 +32,7 @@ Please provide a JSON response with these exact fields:
 
 Return ONLY valid JSON, no extra text.`;
 
-        const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash-lite' });
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
 

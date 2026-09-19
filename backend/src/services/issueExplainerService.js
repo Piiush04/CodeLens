@@ -15,7 +15,7 @@ Issue Number: #${issue.number}
 
 Provide a JSON response:
 {
-  "simpleSummary": "1-2 sentence explanation of what needs to be done",
+  "simpleSummary": "2-3 sentence explanation of what needs to be done in easy language",
   "whyItMatters": "Why this issue is important to the project",
   "difficulty": "Beginner/Intermediate/Advanced",
   "estimatedTime": "Time estimate (e.g., 1-2 hours)"
@@ -23,7 +23,7 @@ Provide a JSON response:
 
 Return ONLY valid JSON.`;
 
-        const model = genAI.getGenerativeModel({model: 'gemini-3.6-flash'});
+        const model = genAI.getGenerativeModel({model: 'gemini-3.5-flash-lite'});
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
 

@@ -4,6 +4,21 @@ import { fetchIssues } from '../services/issueService.js';
 import { generateRepoSummary } from '../services/geminiService.js';
 import { explainIssue } from '../services/issueExplainerService.js';
 import pool from "../db.js";
+import { generateStartHereGuide } from '../services/startHereService.js';
+
+import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const GITHUB_PAT = process.env.GITHUB_PAT;
+
+export const githubAPI = axios.create({
+  baseURL: 'https://api.github.com',
+  headers: {
+    Authorization: `token ${GITHUB_PAT}`,
+  },
+});
 
 const router = express.Router();
 
@@ -96,6 +111,42 @@ router.post("/explain-issue",async (req,res)=>{
         res.status(500).json({error: error.message});
     }
 });
+
+// repoRoutes.js
+router.post('/start-here-guide', async (req, res) => {
+  try {
+    const { issue, owner, repo } = req.body;
+
+    if (!issue || !owner || !repo) {
+      return res.status(400).json({ error: 'Missing fields' });
+    }
+
+    // Fetch fileTree from GitHub
+    const treeResponse = await githubAPI.get(
+      `/repos/${owner}/${repo}/git/trees/HEAD?recursive=1`
+    );
+    
+    // Extract ONLY paths (filter to first 200 files to avoid token limit)
+    const filePaths = treeResponse.data.tree
+      .filter(item => item.type === 'blob')
+      .slice(0, 200)
+      .map(item => item.path);
+
+    // Pass only the file path list to the service
+    const guide = await generateStartHereGuide({ 
+      issue, 
+      filePaths,  // NOT fileTree, just the paths
+      owner, 
+      repo 
+    });
+    
+    res.json(guide);
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 
 
